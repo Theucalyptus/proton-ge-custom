@@ -308,6 +308,9 @@
     #echo "WINE: -Nvidia Reflex- Support VK_NV_low_latency2"
     #patch -Np1 < ../patches/proton/83-nv_low_latency_wine.patch
 
+    echo "WINE : MF_MT_SAMPLE_SIZE patch"
+    patch -Np1 < ../patches/proton/90-mf_mt_sample_size_fix.patch
+
     popd
 
 ### END PROTON-GE ADDITIONAL CUSTOM PATCHES ###
