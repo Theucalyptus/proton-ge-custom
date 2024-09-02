@@ -1,0 +1,15 @@
+diff --git a/dlls/mfplat/mediatype.c b/dlls/mfplat/mediatype.c
+index 3f262c7f494..b130c7385ee 100644
+--- a/dlls/mfplat/mediatype.c
++++ b/dlls/mfplat/mediatype.c
+@@ -2746,8 +2746,8 @@ static struct uncompressed_video_format *mf_get_video_format(const GUID *subtype
+ 
+ static unsigned int mf_get_stride_for_format(const struct uncompressed_video_format *format, unsigned int width)
+ {
+-    //return ((width*format->bpp) / 8 + format->alignment) & ~format->alignment;
+-    return (width * (format->bpp / 8) + format->alignment) & ~format->alignment;
++    return ((width*format->bpp) / 8 + format->alignment) & ~format->alignment;
++    //return (width * (format->bpp / 8) + format->alignment) & ~format->alignment;
+ }
+ 
+ unsigned int mf_format_get_stride(const GUID *subtype, unsigned int width, BOOL *is_yuv)
