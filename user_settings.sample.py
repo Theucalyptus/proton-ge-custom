@@ -10,7 +10,7 @@ user_settings = {
     "PROTON_LOG": "1",
 
     #custom Wine debug logging
-    #"WINEDEBUG": "+timestamp,+pid,+tid,+seh,+unwind,+threadname,+debugstr,+loaddll,+mscoree",
+    "WINEDEBUG": "+quartz,+wmvcore,+mfplat,+winegstreamer",
 
     #DXVK debug logging
     "DXVK_LOG_LEVEL": "info",
@@ -29,7 +29,7 @@ user_settings = {
     #"MONO_LOG_LEVEL": "info",
 
     #general purpose media logging
-#    "GST_DEBUG": "4",
+    "GST_DEBUG": "0",
     #or, verbose converter logging (may impact playback performance):
 #    "GST_DEBUG": "4,WINE:7,protonmediaconverter:7",
     "GST_DEBUG_NO_COLOR": "1",
