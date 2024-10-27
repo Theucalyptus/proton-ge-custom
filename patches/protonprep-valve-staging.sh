@@ -344,3 +344,9 @@
 ### END PROTON-GE ADDITIONAL CUSTOM PATCHES ###
 ### END WINE PATCHING ###
 
+
+# Theucalyptus' playground
+pushd wine 
+patch -Np1 < ../patches/lossless_audio_wma_fix.diff
+patch -Np1 < ../patches/copy_userdata.diff
+popd
