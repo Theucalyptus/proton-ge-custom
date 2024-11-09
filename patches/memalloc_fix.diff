@@ -1,0 +1,103 @@
+diff --git a/dlls/quartz/memallocator.c b/dlls/quartz/memallocator.c
+index 7a171769574..9f663418d3d 100644
+--- a/dlls/quartz/memallocator.c
++++ b/dlls/quartz/memallocator.c
+@@ -145,7 +145,8 @@ static ULONG WINAPI BaseMemAllocator_Release(IMemAllocator * iface)
+     BaseMemAllocator *This = impl_from_IMemAllocator(iface);
+     ULONG ref = InterlockedDecrement(&This->ref);
+ 
+-    TRACE("%p decreasing refcount to %lu.\n", This, ref);
++    TRACE("BMA_Release : %p decreasing refcount to %lu.\n", This, ref);
++
+ 
+     if (!ref)
+     {
+@@ -265,6 +266,11 @@ static HRESULT WINAPI BaseMemAllocator_Decommit(IMemAllocator * iface)
+     HRESULT hr;
+ 
+     TRACE("(%p)->()\n", This);
++    EnterCriticalSection(This->pCritSect);
++    {
++        TRACE("Entrée dans Decommit : bCommited %d bDecommitQueued %d\n", This->bCommitted, This->bDecommitQueued);
++    }
++    LeaveCriticalSection(This->pCritSect);
+ 
+     EnterCriticalSection(This->pCritSect);
+     {
+@@ -274,6 +280,7 @@ static HRESULT WINAPI BaseMemAllocator_Decommit(IMemAllocator * iface)
+         {
+             if (!list_empty(&This->used_list))
+             {
++                TRACE("%p bDecommitQueued set to TRUE\n", This);
+                 This->bDecommitQueued = TRUE;
+                 /* notify ALL waiting threads that they cannot be allocated a buffer any more */
+                 ReleaseSemaphore(This->hSemWaiting, This->lWaiting, NULL);
+@@ -282,14 +289,16 @@ static HRESULT WINAPI BaseMemAllocator_Decommit(IMemAllocator * iface)
+             }
+             else
+             {
+-                if (This->lWaiting != 0)
+-                    ERR("Waiting: %ld\n", This->lWaiting);
++                TRACE("%p used_list vide\n");
++                TRACE("On garde l'allocator !\n");
++                // if (This->lWaiting != 0)
++                //     ERR("Waiting: %ld\n", This->lWaiting);
+ 
+-                This->bCommitted = FALSE;
+-                CloseHandle(This->hSemWaiting);
+-                This->hSemWaiting = NULL;
++                // This->bCommitted = FALSE;
++                // CloseHandle(This->hSemWaiting);
++                // This->hSemWaiting = NULL;
+ 
+-                hr = This->fnFree(iface);
++                // hr = This->fnFree(iface);
+             }
+         }
+     }
+@@ -315,13 +324,21 @@ static HRESULT WINAPI BaseMemAllocator_GetBuffer(IMemAllocator * iface, IMediaSa
+     if (!This->bCommitted || This->bDecommitQueued)
+     {
+         WARN("Not committed\n");
++        if(!This->bCommitted)
++            TRACE("bCommited FALSE\n");
++        if(This->bDecommitQueued)
++            TRACE("bDecommitQueued TRUE\n");
++        
+         hr = VFW_E_NOT_COMMITTED;
+     }
+     else
+         ++This->lWaiting;
+     LeaveCriticalSection(This->pCritSect);
+-    if (FAILED(hr))
++    if (FAILED(hr)) {
++        WARN("Returning hr %#lx.\n", hr);
+         return hr;
++    }
++
+ 
+     if (WaitForSingleObject(This->hSemWaiting, (dwFlags & AM_GBF_NOWAIT) ? 0 : INFINITE) != WAIT_OBJECT_0)
+     {
+@@ -383,16 +400,17 @@ static HRESULT WINAPI BaseMemAllocator_ReleaseBuffer(IMemAllocator * iface, IMed
+ 
+         if (list_empty(&This->used_list) && This->bDecommitQueued && This->bCommitted)
+         {
++            TRACE("ReleaseBuffer trouve que l'allocateur n'est plus utilisé et va le détruire !\n");
+             if (This->lWaiting != 0)
+                 ERR("Waiting: %ld\n", This->lWaiting);
+ 
+-            This->bCommitted = FALSE;
+-            This->bDecommitQueued = FALSE;
++            // This->bCommitted = FALSE;
++            // This->bDecommitQueued = FALSE;
+ 
+-            CloseHandle(This->hSemWaiting);
+-            This->hSemWaiting = NULL;
++            // CloseHandle(This->hSemWaiting);
++            // This->hSemWaiting = NULL;
+             
+-            This->fnFree(iface);
++            // This->fnFree(iface);
+         }
+     }
+     LeaveCriticalSection(This->pCritSect);
