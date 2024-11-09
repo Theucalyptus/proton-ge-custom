@@ -5,3 +5,8 @@
 
 /.vagrant/
 /vagrant_share/
+
+build/
+.vscode/
+patchlog.txt
+contrib/
