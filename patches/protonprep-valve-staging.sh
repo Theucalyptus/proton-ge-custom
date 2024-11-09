@@ -349,4 +349,5 @@
 pushd wine 
 patch -Np1 < ../patches/lossless_audio_wma_fix.diff
 patch -Np1 < ../patches/copy_userdata.diff
+patch -Np1 < ../patches/memalloc_fix.diff
 popd
